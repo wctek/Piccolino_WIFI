@@ -38,6 +38,11 @@ void Piccolino_WIFI::callFunction(char *fname) {
 
 }
 
+void Piccolino_WIFI::send(String str) {
+	_pserial.print(str);
+
+}
+
 void Piccolino_WIFI::load(char *fname) {
 	String cmd;
 	cmd="dofile(\"";

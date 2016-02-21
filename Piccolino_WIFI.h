@@ -42,6 +42,7 @@ public:
   void getResponse();
   void disconnect();
   void callFunction(char *fname);
+  void send(String str);
 
   
   virtual size_t write(uint8_t byte);
