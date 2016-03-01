@@ -42,6 +42,7 @@ public:
   void getResponse();
   void disconnect();
   void callFunction(char *fname);
+  void send(String str);
 
   
   virtual size_t write(uint8_t byte);
@@ -50,8 +51,9 @@ public:
   virtual void flush();
   
 private:
-	void _flush();
+  void _flush();
   void _wait(int len);
+  void _clean_buffer();
   byte local_buff[128];
 };
 

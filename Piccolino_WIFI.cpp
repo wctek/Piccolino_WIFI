@@ -38,6 +38,11 @@ void Piccolino_WIFI::callFunction(char *fname) {
 
 }
 
+void Piccolino_WIFI::send(String str) {
+	_pserial.print(str);
+
+}
+
 void Piccolino_WIFI::load(char *fname) {
 	String cmd;
 	cmd="dofile(\"";
@@ -95,6 +100,12 @@ void Piccolino_WIFI::_wait(int len) {
 	}
 }
 
+void Piccolino_WIFI::_clean_buffer() {
+	for(int i = 0; i < (sizeof(local_buff)/sizeof(*local_buff)); i++) {
+		local_buff[i] = 0;
+	}
+}
+
 void Piccolino_WIFI::setIP(char *IP, char *MASK, char *GW) {
 
 	String cmd;
@@ -136,24 +147,25 @@ void Piccolino_WIFI::getIP() {
 	_pserial.println(F("getIP()"));
 
 	_wait(500);
+	
+	// Set the failure condition
+	local_buff[0] = '.';
+	_p_ram.write(0,local_buff,1);
+	
+	_clean_buffer();
 
-	while(1) {
+	while(failed <= 20) {
 		if(_pserial.available()) {
 			ch=_pserial.read();
 
 			if(ch==13) {				
-				if(oldch!='.') // skip the '.' which indicates waiting for ip ...
-				{
-					local_buff[pos]=0;
-					_p_ram.write(0,local_buff,pos+1);
+				if(oldch!='.') { // skip the '.' which indicates waiting for ip ...
+					_p_ram.write(0,local_buff,pos);
 					return;			
 				} else {
-				pos=0;
-				failed++;
-				if(failed > 20) { // 20 tries max				
-					local_buff[0]=0;
-					return;
-				}
+					_clean_buffer();
+					pos=0;
+					failed++;
 				}
 			}
 			else
@@ -161,9 +173,8 @@ void Piccolino_WIFI::getIP() {
 				oldch=ch;
 				local_buff[pos]=ch;
 				pos++;
-				if(pos>14) {
-					local_buff[pos]=0;
-					_p_ram.write(0,local_buff,pos+1);
+				if(pos>15) {
+					_clean_buffer();
 					pos=0;
 				}
 			}
